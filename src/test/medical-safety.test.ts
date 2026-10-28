@@ -1,0 +1,23 @@
+import { describe, it, expect } from "vitest";
+import { checkPrescriptionConflicts, detectMedicalAlerts } from "@/lib/medicalSafety";
+
+describe("prescription allergy hard-stop", () => {
+  it("blocks amoxicillin for a penicillin-allergic patient", () => {
+    const c = checkPrescriptionConflicts(["Amoxicillin 500mg"], "Penicillin");
+    expect(c).toHaveLength(1);
+    expect(c[0].severity).toBe("allergy");
+  });
+  it("allows azithromycin for a penicillin-allergic patient", () => {
+    expect(checkPrescriptionConflicts(["Azithromycin 500mg"], "Penicillin")).toHaveLength(0);
+  });
+  it("flags ibuprofen for a patient on warfarin", () => {
+    const c = checkPrescriptionConflicts(["Ibuprofen 400mg"], "", "On warfarin for AF");
+    expect(c.some((x) => x.severity === "caution")).toBe(true);
+  });
+});
+
+describe("medical alerts", () => {
+  it("detects pregnancy and diabetes from history", () => {
+    expect(detectMedicalAlerts("Type 2 diabetic, currently pregnant")).toEqual(["Diabetes", "Pregnant"]);
+  });
+});
