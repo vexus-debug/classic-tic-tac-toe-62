@@ -13,6 +13,16 @@ export interface UpdateEntry {
 
 export const updates: UpdateEntry[] = [
   {
+    version: "v2.8.0",
+    date: "October 28, 2026",
+    title: "Lab cases on the patient record",
+    kind: "feature",
+    items: [
+      { kind: "feature", text: "Each patient's record now has a Lab Cases tab showing every crown, bridge, denture or aligner with shade, dates and status." },
+      { kind: "improvement", text: "Overdue lab work is flagged, and new lab cases can be ordered for the patient in one tap." },
+    ],
+  },
+  {
     version: "v2.7.0",
     date: "October 28, 2026",
     title: "Patient safety: allergy banner, prescription hard-stop and structured intake",

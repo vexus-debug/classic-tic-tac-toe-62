@@ -32,6 +32,7 @@ import { CreateInvoiceDialog } from "@/components/dashboard/CreateInvoiceDialog"
 import { InvoiceDetailDialog } from "@/components/dashboard/InvoiceDetailDialog";
 import { CreatePrescriptionDialog } from "@/components/dashboard/CreatePrescriptionDialog";
 import { CreateLabCaseDialog } from "@/components/dashboard/CreateLabCaseDialog";
+import { PatientLabCasesSection, usePatientLabCases, isLabCaseActive } from "@/components/dashboard/PatientLabCasesSection";
 import { toast } from "@/hooks/use-toast";
 import { OfflineDentalHistorySection } from "@/components/dashboard/OfflineDentalHistorySection";
 import { openPatientDocument } from "@/lib/documentUtils";
@@ -109,6 +110,8 @@ export default function PatientProfilePage() {
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [labCaseOpen, setLabCaseOpen] = useState(false);
+  const { cases: patientLabCases } = usePatientLabCases(patientId);
+  const activeLabCount = patientLabCases.filter(isLabCaseActive).length;
   const [bookOpen, setBookOpen] = useState(false);
   const checkIn = useAddToWaitingList();
   const isFrontDesk = ["receptionist"].includes(orgRole);
@@ -294,6 +297,11 @@ export default function PatientProfilePage() {
           {canViewClinical && <TabsTrigger value="notes">Clinical Notes</TabsTrigger>}
           {canViewClinical && <TabsTrigger value="images">Images</TabsTrigger>}
           {isEyeClinic && <TabsTrigger value="eye">Eye Records</TabsTrigger>}
+          {terms.showDentalChart && (
+            <TabsTrigger value="lab">
+              Lab Cases{activeLabCount > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{activeLabCount}</Badge>}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="consents">Consents</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
@@ -763,6 +771,17 @@ export default function PatientProfilePage() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        {/* Lab cases */}
+        <TabsContent value="lab" className="mt-4">
+          {patientId && (
+            <PatientLabCasesSection
+              patientId={patientId}
+              onOrder={() => setLabCaseOpen(true)}
+              onOpenCentral={() => navigate(`${basePath}/lab-work`)}
+            />
+          )}
         </TabsContent>
 
         {/* Documents */}
