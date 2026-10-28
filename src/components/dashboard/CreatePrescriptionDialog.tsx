@@ -22,6 +22,7 @@ import { useCreatePrescription } from "@/hooks/usePrescriptions";
 import { useClinicTerms } from "@/hooks/useClinicTerms";
 import { useDentalChartEntries } from "@/hooks/useDentalCharts";
 import { Textarea } from "@/components/ui/textarea";
+import { checkPrescriptionConflicts } from "@/lib/medicalSafety";
 
 const prescriptionTemplates = [
   {
@@ -159,6 +160,15 @@ export function CreatePrescriptionDialog({ open, onOpenChange, preselectedPatien
   useEffect(() => { if (open) { setSafety(null); setRationale(""); } }, [open]);
   const medKey = (d: PrescriptionForm) => d.patientId + "::" + d.medications.map((m) => `${m.name} ${m.dosage} ${m.frequency} ${m.duration}`).join(";");
 
+  // Instant, offline allergy / medical-alert cross-check (rule-based, no AI).
+  const watchedMeds = form.watch("medications");
+  const selectedPatient = patients.find((p) => p.id === watchedPatient);
+  const conflicts = selectedPatient
+    ? checkPrescriptionConflicts((watchedMeds || []).map((m) => m?.name || ""), selectedPatient.allergies, selectedPatient.medical_history)
+    : [];
+  const [overrideReason, setOverrideReason] = useState("");
+  useEffect(() => { if (open) setOverrideReason(""); }, [open]);
+
   async function runSafetyCheck(data: PrescriptionForm) {
     if (!currentOrg?.org_id) return null;
     setChecking(true);
@@ -177,6 +187,10 @@ export function CreatePrescriptionDialog({ open, onOpenChange, preselectedPatien
   }
 
   async function onSubmit(data: PrescriptionForm) {
+    if (conflicts.length && !overrideReason.trim()) {
+      toast({ title: "Contraindication override required", description: "Record your clinical justification or change the medication.", variant: "destructive" });
+      return;
+    }
     let res = safety;
     if (!res || res.key !== medKey(data)) {
       res = await runSafetyCheck(data);
@@ -191,7 +205,10 @@ export function CreatePrescriptionDialog({ open, onOpenChange, preselectedPatien
         patient_id: data.patientId,
         dentist_id: data.dentistId,
         diagnosis: data.diagnosis || undefined,
-        notes: res && res.warnings.length ? `Safety warnings overridden by clinician. Rationale: ${rationale.trim()}\nWarnings: ${res.warnings.join(" / ")}` : undefined,
+        notes: [
+          conflicts.length ? `Contraindication overridden: ${conflicts.map((c) => `${c.medication} (${c.reason})`).join("; ")}. Justification: ${overrideReason.trim()}` : "",
+          res && res.warnings.length ? `Safety warnings overridden by clinician. Rationale: ${rationale.trim()}\nWarnings: ${res.warnings.join(" / ")}` : "",
+        ].filter(Boolean).join("\n") || undefined,
         medications: data.medications as { name: string; dosage: string; frequency: string; duration: string }[],
       },
       {
@@ -318,6 +335,21 @@ export function CreatePrescriptionDialog({ open, onOpenChange, preselectedPatien
                 <Plus className="mr-1 h-3.5 w-3.5" /> Add Medication
               </Button>
             </div>
+
+            {conflicts.length > 0 && (
+              <div role="alert" className="rounded-lg border-2 border-destructive bg-destructive/10 p-3 space-y-2">
+                <p className="flex items-center gap-1.5 text-sm font-semibold text-destructive"><ShieldAlert className="h-4 w-4" /> Contraindication — review before prescribing</p>
+                <ul className="space-y-1.5 text-xs">
+                  {conflicts.map((c, i) => (
+                    <li key={i} className={c.severity === "allergy" ? "font-medium text-destructive" : "text-foreground"}>
+                      <span className="font-semibold">{c.medication}</span> — {c.reason}
+                      {c.alternative && <span className="block text-muted-foreground">Consider instead: {c.alternative}</span>}
+                    </li>
+                  ))}
+                </ul>
+                <Textarea rows={2} className="text-sm" placeholder="Clinical justification to override (required, saved with the prescription)" value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} />
+              </div>
+            )}
 
             {safety && safety.key === medKey(form.getValues()) && (
               safety.warnings.length === 0 ? (

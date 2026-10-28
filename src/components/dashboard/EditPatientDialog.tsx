@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUpdatePatient } from "@/hooks/usePatients";
 import type { Patient } from "@/hooks/usePatients";
+import { MedicalChecklist } from "@/components/dashboard/MedicalChecklist";
 
 interface EditPatientDialogProps {
   patient: Patient | null;
@@ -126,13 +127,19 @@ export function EditPatientDialog({ patient, open, onOpenChange }: EditPatientDi
               <Input value={form.emergency_contact_phone} onChange={(e) => setForm({ ...form, emergency_contact_phone: e.target.value })} placeholder="Phone" />
             </div>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Medical History</Label>
-            <Textarea value={form.medical_history} onChange={(e) => setForm({ ...form, medical_history: e.target.value })} rows={2} />
-          </div>
+          <MedicalChecklist
+            allergies={form.allergies}
+            medicalHistory={form.medical_history}
+            onAllergiesChange={(v) => setForm((f) => ({ ...f, allergies: v }))}
+            onHistoryChange={(v) => setForm((f) => ({ ...f, medical_history: v }))}
+          />
           <div className="space-y-1">
             <Label className="text-xs">Allergies</Label>
             <Input value={form.allergies} onChange={(e) => setForm({ ...form, allergies: e.target.value })} placeholder="Comma-separated" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Medical History / Notes</Label>
+            <Textarea value={form.medical_history} onChange={(e) => setForm({ ...form, medical_history: e.target.value })} rows={3} />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">Referral Source</Label>
