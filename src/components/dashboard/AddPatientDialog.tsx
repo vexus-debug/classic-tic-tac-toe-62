@@ -58,7 +58,7 @@ export function AddPatientDialog({ open, onOpenChange, onCreated }: AddPatientDi
     defaultValues: {
       firstName: "", lastName: "", phone: "", email: "", address: "",
       occupation: "", emergencyName: "", emergencyPhone: "",
-      medicalHistory: "", referralSource: "",
+      medicalHistory: "", allergies: "", referralSource: "",
     },
   });
 
