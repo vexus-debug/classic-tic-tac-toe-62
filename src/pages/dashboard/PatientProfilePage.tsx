@@ -1,5 +1,6 @@
 import { PageSkeleton } from "@/components/dashboard/PageSkeleton";
 import { PatientImageThumb } from "@/components/dashboard/PatientImageThumb";
+import { PatientAlertBanner } from "@/components/dashboard/PatientAlertBanner";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -279,6 +280,8 @@ export default function PatientProfilePage() {
           </div>
         )}
       </div>
+
+      <PatientAlertBanner allergies={patient.allergies} medicalHistory={patient.medical_history} onEdit={() => setEditOpen(true)} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1" data-tour="patients-detail-tabs">

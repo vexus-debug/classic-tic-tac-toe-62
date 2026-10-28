@@ -20,6 +20,7 @@ import { useCreatePatient } from "@/hooks/usePatients";
 import { useState } from "react";
 import { useAddToWaitingList } from "@/hooks/useWaitingList";
 import { BookAppointmentDialog } from "@/components/dashboard/BookAppointmentDialog";
+import { MedicalChecklist } from "@/components/dashboard/MedicalChecklist";
 
 const patientSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50),
@@ -33,6 +34,7 @@ const patientSchema = z.object({
   emergencyName: z.string().trim().max(100).optional(),
   emergencyPhone: z.string().trim().max(20).optional(),
   medicalHistory: z.string().trim().max(1000).optional(),
+  allergies: z.string().trim().max(500).optional(),
   referralSource: z.string().optional(),
 });
 
@@ -74,6 +76,7 @@ export function AddPatientDialog({ open, onOpenChange, onCreated }: AddPatientDi
         emergency_contact_name: data.emergencyName || "",
         emergency_contact_phone: data.emergencyPhone || "",
         medical_history: data.medicalHistory || "",
+        allergies: data.allergies || "",
         referral_source: data.referralSource || "",
       },
       {
@@ -224,10 +227,23 @@ export function AddPatientDialog({ open, onOpenChange, onCreated }: AddPatientDi
             <div>
               <h4 className="text-sm font-medium mb-3">Medical & Referral</h4>
               <div className="space-y-3">
+                <MedicalChecklist
+                  allergies={form.watch("allergies") || ""}
+                  medicalHistory={form.watch("medicalHistory") || ""}
+                  onAllergiesChange={(v) => form.setValue("allergies", v)}
+                  onHistoryChange={(v) => form.setValue("medicalHistory", v)}
+                />
+                <FormField control={form.control} name="allergies" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Other allergies</FormLabel>
+                    <FormControl><Input placeholder="Comma-separated, e.g. Penicillin, Latex" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
                 <FormField control={form.control} name="medicalHistory" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Medical History / Notes</FormLabel>
-                    <FormControl><Textarea placeholder="Existing conditions, medications, allergies..." rows={3} {...field} /></FormControl>
+                    <FormControl><Textarea placeholder="Existing conditions, current medications, clinic-specific notes..." rows={3} {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
