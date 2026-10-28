@@ -21,3 +21,12 @@ describe("medical alerts", () => {
     expect(detectMedicalAlerts("Type 2 diabetic, currently pregnant")).toEqual(["Diabetes", "Pregnant"]);
   });
 });
+
+import { toggleAlertInHistory } from "@/lib/medicalSafety";
+describe("structured intake tags", () => {
+  it("adds and removes a medical alert from history", () => {
+    const on = toggleAlertInHistory("Asthma since childhood", "Bisphosphonates");
+    expect(detectMedicalAlerts(on)).toContain("Bisphosphonates");
+    expect(detectMedicalAlerts(toggleAlertInHistory(on, "Bisphosphonates"))).not.toContain("Bisphosphonates");
+  });
+});

@@ -13,6 +13,17 @@ export interface UpdateEntry {
 
 export const updates: UpdateEntry[] = [
   {
+    version: "v2.7.0",
+    date: "October 28, 2026",
+    title: "Patient safety: allergy banner, prescription hard-stop and structured intake",
+    kind: "feature",
+    items: [
+      { kind: "feature", text: "Allergies and medical alerts now stay visible on every tab of a patient's record, with chairside guidance on tap." },
+      { kind: "feature", text: "Prescriptions instantly flag medicines that clash with a patient's allergies or conditions, suggest safer options, and require a written justification to override." },
+      { kind: "improvement", text: "Adding or editing a patient now offers one-tap allergy and medical-risk tags." },
+    ],
+  },
+  {
     version: "v2.6.3",
     date: "October 28, 2026",
     title: "Fresh dashboard screenshots on the dental clinics page",

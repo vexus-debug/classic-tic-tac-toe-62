@@ -205,7 +205,10 @@ export function CreatePrescriptionDialog({ open, onOpenChange, preselectedPatien
         patient_id: data.patientId,
         dentist_id: data.dentistId,
         diagnosis: data.diagnosis || undefined,
-        notes: res && res.warnings.length ? `Safety warnings overridden by clinician. Rationale: ${rationale.trim()}\nWarnings: ${res.warnings.join(" / ")}` : undefined,
+        notes: [
+          conflicts.length ? `Contraindication overridden: ${conflicts.map((c) => `${c.medication} (${c.reason})`).join("; ")}. Justification: ${overrideReason.trim()}` : "",
+          res && res.warnings.length ? `Safety warnings overridden by clinician. Rationale: ${rationale.trim()}\nWarnings: ${res.warnings.join(" / ")}` : "",
+        ].filter(Boolean).join("\n") || undefined,
         medications: data.medications as { name: string; dosage: string; frequency: string; duration: string }[],
       },
       {
