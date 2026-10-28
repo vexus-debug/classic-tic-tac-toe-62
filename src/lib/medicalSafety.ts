@@ -31,6 +31,29 @@ const ALLERGY_CLASSES: { match: RegExp; label: string; drugs: string[]; alternat
 
 const NSAIDS = ["ibuprofen", "diclofenac", "naproxen", "aspirin", "piroxicam", "ketoprofen", "mefenamic"];
 
+/** Allergy tags offered on the intake form. */
+export const INTAKE_ALLERGIES = ["Penicillin", "Sulfa", "Codeine", "NSAIDs", "Aspirin", "Latex", "Local anaesthetic"] as const;
+
+/** What each medical alert means chairside (shown in the expanded banner). */
+export const ALERT_GUIDANCE: Record<string, string> = {
+  "Anticoagulants / bleeding disorder": "Bleeding risk — check INR before extractions, use local haemostatics, avoid NSAIDs.",
+  "Bisphosphonates": "Risk of jaw osteonecrosis — avoid elective extractions or implants where possible.",
+  "Heart condition / premedication": "May need antibiotic cover before invasive procedures; limit adrenaline.",
+  "Diabetes": "Slower healing and infection risk — confirm they have eaten; watch for hypoglycaemia.",
+  "Hypertension": "Check blood pressure before treatment; limit adrenaline in local anaesthetic.",
+  "Pregnant": "Avoid elective X-rays and NSAIDs; prefer second trimester for treatment.",
+  "Asthma": "Keep inhaler at hand; avoid NSAIDs.",
+  "Epilepsy": "Confirm seizure control; keep appointments short and calm.",
+  "HIV / Hepatitis": "Standard precautions; check bleeding and medication interactions.",
+};
+
+/** Add or remove a medical alert line in the free-text history. */
+export function toggleAlertInHistory(history: string, alert: string): string {
+  const has = detectMedicalAlerts(history).includes(alert);
+  if (!has) return history.trim() ? `${history.trim()}\n${alert}` : alert;
+  return history.split("\n").filter((l) => l.trim() !== alert).join("\n");
+}
+
 export function parseList(text?: string | null): string[] {
   if (!text) return [];
   return text.split(/[,;\n]/).map((s) => s.trim()).filter(Boolean);
